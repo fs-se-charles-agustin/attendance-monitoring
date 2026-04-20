@@ -4,21 +4,26 @@ import crypto from "crypto";
 import bcrypt from "bcrypt";
 import { User } from "../models/User";
 import { sendPasswordResetEmail, sendOtpEmail } from "../services/email.service";
-import dotenv from "dotenv";
+import { authSchema } from "../schema/auth.schema";
+import { AuthType } from "../types/auth.type";
 
-dotenv.config();
 
-export const signup = async (req: Request, res: Response) => {
+export const signup = async (req: Request<{}, {}, AuthType>, res: Response) => {
     try {
-        const {firstName, lastName, email, password} = req.body;
-        
-        if (!firstName || !lastName || !email || !password) {
-            return res.status(400).json({message: "All fields are required"});
-        }
 
-        const existingUser = await User.findOne({email});
+        const parsedData = authSchema.safeParse(req.body)
+
+        if (!parsedData.success)
+            return res.status(400).json({
+                message: "Signup failed",
+                error: parsedData.error?.issues,
+            });
+
+        const { email, firstName, lastName, password } = parsedData.data
+
+        const existingUser = await User.findOne({ email });
         if (existingUser && existingUser.isVerified) {
-            return res.status(400).json({message: "User already exists"});
+            return res.status(400).json({ message: "User already exists" });
         }
 
         // Generate 6-digit OTP
@@ -57,7 +62,7 @@ export const signup = async (req: Request, res: Response) => {
         }
     } catch (error: any) {
         console.error("Signup error:", error);
-        return res.status(500).json({message: error.message || "Internal server error"});
+        return res.status(500).json({ message: error.message || "Internal server error" });
     }
 };
 
@@ -66,7 +71,7 @@ export const verifySignupOtp = async (req: Request, res: Response) => {
         const { email, otp } = req.body;
 
         if (!email || !otp) {
-            return res.status(400).json({message: "Email and OTP are required"});
+            return res.status(400).json({ message: "Email and OTP are required" });
         }
 
         const user = await User.findOne({
@@ -76,7 +81,7 @@ export const verifySignupOtp = async (req: Request, res: Response) => {
         });
 
         if (!user) {
-            return res.status(400).json({message: "Invalid or expired OTP"});
+            return res.status(400).json({ message: "Invalid or expired OTP" });
         }
 
         user.isVerified = true;
@@ -89,7 +94,7 @@ export const verifySignupOtp = async (req: Request, res: Response) => {
         });
     } catch (error: any) {
         console.error("OTP verification error:", error);
-        return res.status(500).json({message: "Internal server error"});
+        return res.status(500).json({ message: "Internal server error" });
     }
 };
 
@@ -101,15 +106,15 @@ export const login = async (req: Request, res: Response) => {
         const expiresIn = rememberMe ? "7d" : "1d";
 
         const token = jwt.sign(
-            {id: user._id, email: user.email},
+            { id: user._id, email: user.email },
             process.env.JWT_SECRET!,
-            {expiresIn}
+            { expiresIn }
         );
 
-        res.json({token, expiresIn});
+        res.json({ token, expiresIn });
     } catch (error: any) {
         console.error("Login error:", error);
-        return res.status(500).json({message: "Internal server error"});
+        return res.status(500).json({ message: "Internal server error" });
     }
 };
 
@@ -118,11 +123,11 @@ export const forgotPassword = async (req: Request, res: Response) => {
         const { email } = req.body;
 
         if (!email) {
-            return res.status(400).json({message: "Email is required"});
+            return res.status(400).json({ message: "Email is required" });
         }
 
-        const user = await User.findOne({email});
-        
+        const user = await User.findOne({ email });
+
         if (!user) {
             return res.status(200).json({
                 message: "If an account with that email exists, a password reset link has been sent."
@@ -145,13 +150,13 @@ export const forgotPassword = async (req: Request, res: Response) => {
             user.resetPasswordToken = undefined;
             user.resetPasswordExpires = undefined;
             await user.save();
-            
+
             console.error("Email error:", emailError);
-            return res.status(500).json({message: "Failed to send reset email"});
+            return res.status(500).json({ message: "Failed to send reset email" });
         }
     } catch (error: any) {
         console.error("Forgot password error:", error);
-        return res.status(500).json({message: "Internal server error"});
+        return res.status(500).json({ message: "Internal server error" });
     }
 };
 
@@ -160,7 +165,7 @@ export const resetPassword = async (req: Request, res: Response) => {
         const { token, password } = req.body;
 
         if (!token || !password) {
-            return res.status(400).json({message: "Token and password are required"});
+            return res.status(400).json({ message: "Token and password are required" });
         }
 
         const resetTokenHash = crypto.createHash("sha256").update(token).digest("hex");
@@ -171,7 +176,7 @@ export const resetPassword = async (req: Request, res: Response) => {
         });
 
         if (!user) {
-            return res.status(400).json({message: "Invalid or expired reset token"});
+            return res.status(400).json({ message: "Invalid or expired reset token" });
         }
 
         user.password = password;
@@ -179,10 +184,10 @@ export const resetPassword = async (req: Request, res: Response) => {
         user.resetPasswordExpires = undefined;
         await user.save();
 
-        return res.status(200).json({message: "Password has been reset successfully"});
+        return res.status(200).json({ message: "Password has been reset successfully" });
     } catch (error: any) {
         console.error("Reset password error:", error);
-        return res.status(500).json({message: "Internal server error"});
+        return res.status(500).json({ message: "Internal server error" });
     }
 };
 
@@ -192,19 +197,19 @@ export const adminResetPassword = async (req: Request, res: Response) => {
     try {
         // Only allow in development
         if (process.env.NODE_ENV === "production") {
-            return res.status(403).json({message: "This endpoint is not available in production"});
+            return res.status(403).json({ message: "This endpoint is not available in production" });
         }
 
         const { email, newPassword } = req.body;
 
         if (!email || !newPassword) {
-            return res.status(400).json({message: "Email and newPassword are required"});
+            return res.status(400).json({ message: "Email and newPassword are required" });
         }
 
-        const user = await User.findOne({email});
+        const user = await User.findOne({ email });
 
         if (!user) {
-            return res.status(404).json({message: "User not found"});
+            return res.status(404).json({ message: "User not found" });
         }
 
         // Set password directly - the pre-save hook will hash it
@@ -212,9 +217,9 @@ export const adminResetPassword = async (req: Request, res: Response) => {
         await user.save();
 
         console.log(`Password reset for user: ${email}`);
-        return res.status(200).json({message: "Password has been reset successfully"});
+        return res.status(200).json({ message: "Password has been reset successfully" });
     } catch (error: any) {
         console.error("Admin reset password error:", error);
-        return res.status(500).json({message: "Internal server error"});
+        return res.status(500).json({ message: "Internal server error" });
     }
 };
