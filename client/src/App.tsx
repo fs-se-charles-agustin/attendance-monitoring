@@ -5,22 +5,22 @@ import { ForgotPasswordPage } from "./pages/ForgotPasswordPage";
 import { ResetPasswordPage } from "./pages/ResetPasswordPage";
 import { VerifyOtpPage } from "./pages/VerifyOtpPage";
 import { ProtectedRoute } from "./components/ProtectedRoute";
-import { RoleRoute } from "./components/RoleRoute";
+import { RoleRoute } from "./components/RoleRoute.tsx";
 import { AuthProvider, useAuth } from "./auth/AuthContext";
 import { Layout } from "./components/Layout";
 
 // Student Pages
 import { StudentDashboard } from "./pages/student/StudentDashboard";
-import { QRScanPage } from "./pages/student/QRScanPage";
-import { StudentLogsPage } from "./pages/student/StudentLogsPage";
-import { StudentReportsPage } from "./pages/student/StudentReportsPage";
+import { QRScanPage } from "./pages/student/QRScanPage.tsx";
+import { StudentLogsPage } from "./pages/student/StudentLogsPage.tsx";
+import { StudentReportsPage } from "./pages/student/StudentReportsPage.tsx";
 
 // Admin Pages
 import { AdminDashboard } from "./pages/admin/AdminDashboard";
-import { CompaniesPage } from "./pages/admin/CompaniesPage";
-import { InternsPage } from "./pages/admin/InternsPage";
-import { AdminLogsPage } from "./pages/admin/AdminLogsPage";
-import { AdminReportsPage } from "./pages/admin/AdminReportsPage";
+import { CompaniesPage } from "./pages/admin/CompaniesPage.tsx";
+import { InternsPage } from "./pages/admin/InternsPage.tsx";
+import { AdminLogsPage } from "./pages/admin/AdminLogsPage.tsx";
+import { AdminReportsPage } from "./pages/admin/AdminReportsPage.tsx";
 
 const DashboardRedirect = () => {
   const { user } = useAuth();
