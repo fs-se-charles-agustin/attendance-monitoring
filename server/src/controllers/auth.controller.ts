@@ -10,10 +10,15 @@ dotenv.config();
 
 export const signup = async (req: Request, res: Response) => {
     try {
-        const { firstName, lastName, email, password } = req.body;
+        const { firstName, lastName, email, password, requiredOjtHours } = req.body;
 
-        if (!firstName || !lastName || !email || !password) {
+        if (!firstName || !lastName || !email || !password || requiredOjtHours === undefined) {
             return res.status(400).json({ message: "All fields are required" });
+        }
+
+        const parsedRequiredOjtHours = Number(requiredOjtHours);
+        if (!Number.isFinite(parsedRequiredOjtHours) || parsedRequiredOjtHours <= 0) {
+            return res.status(400).json({ message: "Required OJT hours must be greater than 0" });
         }
 
         const existingUser = await User.findOne({ email });
@@ -28,12 +33,14 @@ export const signup = async (req: Request, res: Response) => {
             existingUser.firstName = firstName;
             existingUser.lastName = lastName;
             existingUser.password = password;
+            existingUser.requiredOjtHours = parsedRequiredOjtHours;
             existingUser.otp = otp;
             existingUser.otpExpires = otpExpires;
             await existingUser.save();
         } else {
             await User.create({
                 firstName, lastName, email, password,
+                requiredOjtHours: parsedRequiredOjtHours,
                 role: "student",
                 otp, otpExpires, isVerified: false,
             });

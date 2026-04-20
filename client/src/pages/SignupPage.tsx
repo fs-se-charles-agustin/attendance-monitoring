@@ -20,6 +20,7 @@ interface SignupFormValues {
   email: string;
   password: string;
   confirmPassword: string;
+  requiredOjtHours: number;
 }
 export const SignupPage = () => {
   const form = useForm<SignupFormValues>({
@@ -29,6 +30,7 @@ export const SignupPage = () => {
       email: "",
       password: "",
       confirmPassword: "",
+      requiredOjtHours: 500,
     },
   });
   const { signup } = useAuth();
@@ -42,11 +44,15 @@ export const SignupPage = () => {
       setError("Passwords do not match");
       return;
     }
+    if (!values.requiredOjtHours || values.requiredOjtHours <= 0) {
+      setError("Required OJT hours must be greater than 0");
+      return;
+    }
 
     try {
       setError(null);
       setIsLoading(true);
-      await signup(values.firstName, values.lastName, values.email, values.password);
+      await signup(values.firstName, values.lastName, values.email, values.password, Number(values.requiredOjtHours));
       setSuccess(true);
       setTimeout(() => {
         navigate("/verify-otp", { state: { email: values.email } });
@@ -120,6 +126,28 @@ export const SignupPage = () => {
                           <FormLabel className="text-sm font-medium text-slate-600">Password</FormLabel>
                           <FormControl>
                             <Input type="password" placeholder="Create a password" className="h-12 rounded-xl border-slate-200 bg-slate-50 text-base text-slate-900" {...field} />
+                          </FormControl>
+                        </FormItem>
+                      )}
+                    />
+
+                    <FormField
+                      control={form.control}
+                      name="requiredOjtHours"
+                      render={({ field }) => (
+                        <FormItem className="space-y-2">
+                          <FormLabel className="text-sm font-medium text-slate-600">Required OJT Hours</FormLabel>
+                          <FormControl>
+                            <Input
+                              type="number"
+                              min={1}
+                              step={1}
+                              placeholder="Enter required OJT hours"
+                              className="h-12 rounded-xl border-slate-200 bg-slate-50 text-base text-slate-900"
+                              {...field}
+                              value={field.value ?? ""}
+                              onChange={(e) => field.onChange(Number(e.target.value))}
+                            />
                           </FormControl>
                         </FormItem>
                       )}

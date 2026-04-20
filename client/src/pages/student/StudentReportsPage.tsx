@@ -6,7 +6,7 @@ import { Download } from "lucide-react";
 import jsPDF from "jspdf";
 import html2canvas from "html2canvas";
 
-const REQUIRED_HOURS = parseFloat(import.meta.env.VITE_REQUIRED_OJT_HOURS || "500");
+const DEFAULT_REQUIRED_HOURS = parseFloat(import.meta.env.VITE_REQUIRED_OJT_HOURS || "500");
 
 export const StudentReportsPage = () => {
   const { user } = useAuth();
@@ -24,6 +24,7 @@ export const StudentReportsPage = () => {
   }, [user?.id]);
 
   const totalHours = records.reduce((acc: number, r: any) => acc + (r.hoursWorked || 0), 0);
+  const requiredHours = user?.requiredOjtHours || DEFAULT_REQUIRED_HOURS;
 
   const handleExportPDF = async () => {
     const el = reportRef.current;
@@ -66,7 +67,7 @@ export const StudentReportsPage = () => {
           <div><span className="font-semibold">Name: </span>{user?.firstName} {user?.lastName}</div>
           <div><span className="font-semibold">Email: </span>{user?.email}</div>
           <div><span className="font-semibold">Total Hours: </span>{totalHours.toFixed(2)}h</div>
-          <div><span className="font-semibold">Required: </span>{REQUIRED_HOURS}h ({((totalHours / REQUIRED_HOURS) * 100).toFixed(1)}%)</div>
+          <div><span className="font-semibold">Required: </span>{requiredHours}h ({((totalHours / requiredHours) * 100).toFixed(1)}%)</div>
         </div>
         <table className="w-full text-sm border-collapse">
           <thead>

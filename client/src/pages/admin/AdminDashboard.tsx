@@ -4,7 +4,7 @@ import { getSocket } from "@/services/socket/socket.service";
 import { format } from "date-fns";
 import { Users, CheckCircle2, Clock, AlertCircle, TrendingUp, RefreshCw } from "lucide-react";
 
-const REQUIRED_HOURS = parseFloat(import.meta.env.VITE_REQUIRED_OJT_HOURS || "500");
+const DEFAULT_REQUIRED_HOURS = parseFloat(import.meta.env.VITE_REQUIRED_OJT_HOURS || "500");
 
 const StatusBadge = ({ status, isActive }: { status: string; isActive: boolean }) => {
   if (isActive) return <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium bg-emerald-500/20 text-emerald-400"><span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />Present</span>;
@@ -80,7 +80,9 @@ export const AdminDashboard = () => {
           <div className="py-12 text-center"><Users size={28} className="text-slate-600 mx-auto mb-2" /><p className="text-slate-500 text-sm">No interns registered yet</p></div>
         ) : (
           <div className="divide-y divide-slate-200">
-            {interns.map((intern) => (
+            {interns.map((intern) => {
+              const requiredHours = intern.requiredOjtHours || DEFAULT_REQUIRED_HOURS;
+              return (
               <div key={intern._id} className="flex items-center gap-4 px-5 py-4 hover:bg-slate-50 transition-colors">
                 <div className="w-9 h-9 rounded-full bg-gradient-to-br from-violet-500 to-indigo-600 flex items-center justify-center text-xs font-bold text-white flex-shrink-0">
                   {intern.firstName?.[0]}{intern.lastName?.[0]}
@@ -96,12 +98,13 @@ export const AdminDashboard = () => {
                 <div className="hidden md:block text-right min-w-[80px]">
                   <p className="text-slate-400 text-xs">{intern.totalHours?.toFixed(1)}h</p>
                   <div className="w-16 bg-slate-100 rounded-full h-1.5 mt-1 overflow-hidden">
-                    <div className="h-full bg-indigo-500 rounded-full" style={{ width: `${Math.min((intern.totalHours / REQUIRED_HOURS) * 100, 100)}%` }} />
+                    <div className="h-full bg-indigo-500 rounded-full" style={{ width: `${Math.min((intern.totalHours / requiredHours) * 100, 100)}%` }} />
                   </div>
                 </div>
                 <StatusBadge status={intern.todayStatus} isActive={intern.isActive} />
               </div>
-            ))}
+              );
+            })}
           </div>
         )}
       </div>

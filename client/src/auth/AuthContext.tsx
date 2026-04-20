@@ -8,6 +8,7 @@ export interface AuthUser {
   lastName: string;
   role: "student" | "admin";
   totalHours?: number;
+  requiredOjtHours?: number;
   companyId?: string | null;
 }
 
@@ -15,7 +16,7 @@ interface AuthContextType {
   user: AuthUser | null;
   token: string | null;
   login: (email: string, password: string, rememberMe?: boolean) => Promise<void>;
-  signup: (firstName: string, lastName: string, email: string, password: string) => Promise<void>;
+  signup: (firstName: string, lastName: string, email: string, password: string, requiredOjtHours: number) => Promise<void>;
   logout: () => void;
   isAuthenticated: boolean;
   isLoading: boolean;
@@ -56,6 +57,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         lastName: dbUser.lastName,
         role: dbUser.role,
         totalHours: dbUser.totalHours,
+        requiredOjtHours: dbUser.requiredOjtHours,
         companyId: dbUser.companyId?._id || dbUser.companyId || null,
       });
     } catch {
@@ -79,6 +81,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
             lastName: dbUser.lastName,
             role: dbUser.role,
             totalHours: dbUser.totalHours,
+            requiredOjtHours: dbUser.requiredOjtHours,
             companyId: dbUser.companyId?._id || dbUser.companyId || null,
           });
         }).catch(() => {});
@@ -105,13 +108,14 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         lastName: dbUser.lastName,
         role: dbUser.role,
         totalHours: dbUser.totalHours,
+        requiredOjtHours: dbUser.requiredOjtHours,
         companyId: dbUser.companyId?._id || dbUser.companyId || null,
       });
     } catch {}
   };
 
-  const signup = async (firstName: string, lastName: string, email: string, password: string) => {
-    await authService.signup({ firstName, lastName, email, password });
+  const signup = async (firstName: string, lastName: string, email: string, password: string, requiredOjtHours: number) => {
+    await authService.signup({ firstName, lastName, email, password, requiredOjtHours });
   };
 
   const logout = () => {

@@ -1,6 +1,8 @@
 import mongoose from "mongoose";
 import bcrypt from "bcrypt";
 
+const DEFAULT_REQUIRED_OJT_HOURS = parseFloat(process.env.REQUIRED_OJT_HOURS || "500");
+
 const UserSchema = new mongoose.Schema(
   {
     firstName: { type: String, required: true },
@@ -10,6 +12,7 @@ const UserSchema = new mongoose.Schema(
     role: { type: String, enum: ["student", "admin"], default: "student" },
     companyId: { type: mongoose.Schema.Types.ObjectId, ref: "Company", default: null },
     totalHours: { type: Number, default: 0 },
+    requiredOjtHours: { type: Number, default: DEFAULT_REQUIRED_OJT_HOURS },
     resetPasswordToken: { type: String },
     resetPasswordExpires: { type: Date },
     otp: { type: String },

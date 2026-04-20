@@ -4,7 +4,7 @@ import { companyService } from "@/services/company/company.service";
 import { format } from "date-fns";
 import { Users, Search, TrendingUp, Building2, CheckCircle2 } from "lucide-react";
 
-const REQUIRED_HOURS = parseFloat(import.meta.env.VITE_REQUIRED_OJT_HOURS || "500");
+const DEFAULT_REQUIRED_HOURS = parseFloat(import.meta.env.VITE_REQUIRED_OJT_HOURS || "500");
 
 export const InternsPage = () => {
   const [interns, setInterns] = useState<any[]>([]);
@@ -81,7 +81,8 @@ export const InternsPage = () => {
               </thead>
               <tbody className="divide-y divide-slate-200">
                 {filtered.map((intern) => {
-                  const progress = Math.min(((intern.totalHours || 0) / REQUIRED_HOURS) * 100, 100);
+                  const requiredHours = intern.requiredOjtHours || DEFAULT_REQUIRED_HOURS;
+                  const progress = Math.min(((intern.totalHours || 0) / requiredHours) * 100, 100);
                   return (
                     <tr key={intern._id} className="hover:bg-slate-50 transition-colors">
                       <td className="px-5 py-4">

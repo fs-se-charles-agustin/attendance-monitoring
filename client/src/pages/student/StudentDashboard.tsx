@@ -5,7 +5,7 @@ import { getSocket } from "@/services/socket/socket.service";
 import { Clock, TrendingUp, Calendar, CheckCircle2, AlertCircle, Timer, MapPin, Hand, ScanLine, PartyPopper } from "lucide-react";
 import { format } from "date-fns";
 
-const REQUIRED_HOURS = parseFloat(import.meta.env.VITE_REQUIRED_OJT_HOURS || "500");
+const DEFAULT_REQUIRED_HOURS = parseFloat(import.meta.env.VITE_REQUIRED_OJT_HOURS || "500");
 
 const StatCard = ({ icon: Icon, label, value, sub, color }: any) => (
   <div className="bg-white border border-slate-200 rounded-2xl p-5 flex items-start gap-4 hover:border-indigo-200 transition-all duration-300">
@@ -29,7 +29,8 @@ export const StudentDashboard = () => {
   const [success, setSuccess] = useState("");
 
   const totalHours = user?.totalHours || 0;
-  const progress = Math.min((totalHours / REQUIRED_HOURS) * 100, 100);
+  const requiredHours = user?.requiredOjtHours || DEFAULT_REQUIRED_HOURS;
+  const progress = Math.min((totalHours / requiredHours) * 100, 100);
 
   const fetchToday = useCallback(async () => {
     try {
@@ -142,8 +143,8 @@ export const StudentDashboard = () => {
 
       {/* Stats */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-        <StatCard icon={TrendingUp} label="Total Hours" value={`${totalHours.toFixed(1)}h`} sub={`of ${REQUIRED_HOURS}h required`} color="bg-indigo-600" />
-        <StatCard icon={Timer} label="Remaining" value={`${Math.max(REQUIRED_HOURS - totalHours, 0).toFixed(1)}h`} sub="to complete OJT" color="bg-violet-600" />
+        <StatCard icon={TrendingUp} label="Total Hours" value={`${totalHours.toFixed(1)}h`} sub={`of ${requiredHours}h required`} color="bg-indigo-600" />
+        <StatCard icon={Timer} label="Remaining" value={`${Math.max(requiredHours - totalHours, 0).toFixed(1)}h`} sub="to complete OJT" color="bg-violet-600" />
         <StatCard icon={Calendar} label="Today" value={isTimedIn ? "Active" : isTimedOut ? "Done" : "Absent"} sub={todayRecord ? format(new Date(todayRecord.timeIn), "h:mm a") : "Not yet in"} color={isTimedIn ? "bg-emerald-600" : isTimedOut ? "bg-blue-600" : "bg-slate-600"} />
         <StatCard icon={Clock} label="Today Hours" value={isTimedOut ? `${todayRecord.hoursWorked?.toFixed(2)}h` : isTimedIn ? "In progress" : "—"} sub={isTimedIn ? `Since ${format(new Date(todayRecord.timeIn), "h:mm a")}` : ""} color="bg-amber-600" />
       </div>
@@ -152,7 +153,7 @@ export const StudentDashboard = () => {
       <div className="bg-white border border-slate-200 rounded-2xl p-5">
         <div className="flex justify-between items-center mb-3">
           <p className="text-sm font-semibold text-slate-900">OJT Progress</p>
-          <span className="text-xs text-slate-400">{totalHours.toFixed(1)} / {REQUIRED_HOURS}h ({progress.toFixed(1)}%)</span>
+          <span className="text-xs text-slate-400">{totalHours.toFixed(1)} / {requiredHours}h ({progress.toFixed(1)}%)</span>
         </div>
         <div className="w-full bg-slate-100 rounded-full h-3 overflow-hidden">
           <div
@@ -167,7 +168,7 @@ export const StudentDashboard = () => {
               OJT Complete! Congratulations!
             </span>
           ) : (
-            `${(REQUIRED_HOURS - totalHours).toFixed(1)} hours remaining`
+            `${(requiredHours - totalHours).toFixed(1)} hours remaining`
           )}
         </p>
       </div>

@@ -14,7 +14,7 @@ export const authService = {
       body: JSON.stringify(credentials),
     }).then(handleResponse),
 
-  signup: (data: { firstName: string; lastName: string; email: string; password: string }) =>
+  signup: (data: { firstName: string; lastName: string; email: string; password: string; requiredOjtHours: number }) =>
     fetch(`${API}/auth/signup`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },

@@ -190,7 +190,7 @@ export const getAttendanceSummary = async (req: Request, res: Response) => {
       .populate("companyId", "name")
       .sort({ date: 1 });
 
-    const targetUser = await User.findById(targetId).select("firstName lastName email totalHours companyId");
+    const targetUser = await User.findById(targetId).select("firstName lastName email totalHours requiredOjtHours companyId");
 
     return res.json({ user: targetUser, records });
   } catch (error: any) {
